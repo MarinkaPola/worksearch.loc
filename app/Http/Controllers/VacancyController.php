@@ -21,12 +21,25 @@ class VacancyController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\JsonResponse
+    @return JsonResponse
      */
     public function index()
     {
+        /** @var User $user */
+        $user = auth()->user();
+
+        if ($user->role === User::ROLE_WORKER or $user->role === User::ROLE_EMPLOYER ) {
         $vacancies_active = Vacancy::has('vacancyUsers', '<', DB::raw('workers_amount'))->paginate();
-        return $this->success(VacancyResourceCollection::make($vacancies_active));
+        return $this->success(VacancyResourceCollection::make($vacancies_active));}
+        else if ($user->role === User::ROLE_ADMIN and request()->query('only_active')==="true"){
+            $vacancies_active = Vacancy::has('vacancyUsers', '<', DB::raw('workers_amount'))->paginate();
+            return $this->success(VacancyResourceCollection::make($vacancies_active));
+        }
+        else if ($user->role === User::ROLE_ADMIN and request()->query('only_active')==="false") {
+            $vacancies = Vacancy::all();
+           // return $this->success(VacancyResourceCollection::make($vacancies));
+            return VacancyResource::collection($vacancies);
+        }
     }
 
 
@@ -122,7 +135,7 @@ class VacancyController extends Controller
         return $this->success('You are no longer subscribed to this vacancy');
     }
     public function vacancies_count(){
-        $this->authorize(User::class);
+        $this->authorize(Vacancy::class);
         $vacancies_all = Vacancy::count();
         $vacancies_active = Vacancy::has('vacancyUsers', '<', DB::raw('workers_amount'))->count();
         $vacancies_inactive = Vacancy::has('vacancyUsers', '>=', DB::raw('workers_amount'))->count();

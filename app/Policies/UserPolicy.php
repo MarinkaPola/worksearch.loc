@@ -17,9 +17,9 @@ class UserPolicy
      */
     public function viewAny(User $user)
     {
-        //if ($user->role === User::ROLE_ADMIN){
+        if ($user->role === User::ROLE_ADMIN){
             return true;
-        //}
+        }
     }
 
     /**
@@ -59,7 +59,7 @@ class UserPolicy
      */
     public function update(User $user, User $model)
     {
-        if ($model->id === $user->id){
+        if ($user->role === User::ROLE_ADMIN or $model->id === $user->id){
         return true;
     }
     }
@@ -99,10 +99,11 @@ class UserPolicy
      * @param  \App\Models\User  $model
      * @return mixed
      */
-    public function forceDelete(User $user, User $model)
-    {
-        return false;
-    }
+ //   public function forceDelete(User $user, User $model)
+   // {
+     //   return false;
+    //}
+
     public function users_roles_count(User $user) {
         if ($user->role === User::ROLE_ADMIN){
             return true;

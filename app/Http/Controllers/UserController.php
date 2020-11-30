@@ -44,21 +44,7 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function store(UserRequest $request)
-    {
-        //$user = User::create($request->all());
-       // return response()->json($user, 201);
-        $user = User::create($request->validated());
-        return $this->created(UserResource::make($user));
 
-       /** dd ($request->all());**/
-    }
     /**
      * Display the specified resource.
      * @param  \App\Models\User  $user

@@ -18,9 +18,8 @@ class VacancyPolicy
      */
     public function viewAny(User $user)
     {
-        if ($user->role === User::ROLE_WORKER){
+
             return true;
-        }
     }
 
     /**
@@ -32,7 +31,7 @@ class VacancyPolicy
      */
     public function view(User $user, Vacancy $vacancy)
     {
-        if ($user->role === User::ROLE_WORKER or $user->id === $vacancy->employer_id){
+        if ($user->role === User::ROLE_ADMIN or $user->role === User::ROLE_WORKER or $user->id === $vacancy->employer_id){
             return true;
             //просто поле подписчиков для рабочего не отображать
         }
@@ -46,7 +45,7 @@ class VacancyPolicy
      */
     public function create(User $user)
     {
-        if ($user->role === User::ROLE_EMPLOYER){
+        if ($user->role === User::ROLE_EMPLOYER and $user->organizations()->where('id', request()->organization_id)->exists()){
             return true;
         }
     }
@@ -60,7 +59,7 @@ class VacancyPolicy
      */
     public function update(User $user, Vacancy $vacancy)
     {
-        if ($user->id === $vacancy->employer_id and $user->role === User::ROLE_EMPLOYER){
+        if ($user->role === User::ROLE_ADMIN or $user->id === $vacancy->employer_id and $user->role === User::ROLE_EMPLOYER){
             return true;
         }
     }
@@ -74,7 +73,7 @@ class VacancyPolicy
      */
     public function delete(User $user, Vacancy $vacancy)
     {
-        if ($user->id === $vacancy->employer_id){
+        if ($user->role === User::ROLE_ADMIN or $user->id === $vacancy->employer_id){
             return true;
         }
     }
@@ -100,10 +99,10 @@ class VacancyPolicy
      * @param  \App\Models\Vacancy  $vacancy
      * @return mixed
      */
-    public function forceDelete(User $user, Vacancy $vacancy)
-    {
-        return false;
-    }
+    //public function forceDelete(User $user, Vacancy $vacancy)
+   // {
+      //  return false;
+   // }
 
     public function vacancy_book(User $user, Vacancy $vacancy){
         if ($user->role === User::ROLE_WORKER){

@@ -18,7 +18,7 @@ class OrganizationPolicy
      */
     public function viewAny(User $user)
     {
-        if ($user->role === User::ROLE_ADMIN){
+        if ($user->role === User::ROLE_ADMIN or $user->role === User::ROLE_EMPLOYER){
             return true;
         }
     }
@@ -32,7 +32,7 @@ class OrganizationPolicy
      */
     public function view(User $user, Organization $organization)
     {
-        if ($user->id === $organization->employer_id) {
+        if ($user->role === User::ROLE_ADMIN or $user->id === $organization->employer_id) {
             return true;
         }
     }
@@ -44,7 +44,7 @@ class OrganizationPolicy
      */
     public function create(User $user)
     {
-        if ($user->role === User::ROLE_EMPLOYER){
+        if ($user->role === User::ROLE_ADMIN or $user->role === User::ROLE_EMPLOYER){
             return true;
         }
     }
@@ -58,7 +58,7 @@ class OrganizationPolicy
      */
     public function update(User $user, Organization $organization)
     {
-        if ($user->id === $organization->employer_id){
+        if ($user->role === User::ROLE_ADMIN or $user->id === $organization->employer_id){
             return true;
         }
     }
@@ -72,7 +72,7 @@ class OrganizationPolicy
      */
     public function delete(User $user, Organization $organization)
     {
-        if ($user->id === $organization->employer_id){
+        if ($user->role === User::ROLE_ADMIN or $user->id === $organization->employer_id){
             return true;
         }
     }
@@ -98,10 +98,10 @@ class OrganizationPolicy
      * @param  \App\Models\Organization  $organization
      * @return mixed
      */
-    public function forceDelete(User $user, Organization $organization)
-    {
-        return false;
-    }
+   // public function forceDelete(User $user, Organization $organization)
+   // {
+    //    return false;
+   // }
     /**
      * Determine whether the user can permanently delete the model.
      *
