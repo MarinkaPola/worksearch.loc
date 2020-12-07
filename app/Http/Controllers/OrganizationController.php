@@ -77,61 +77,45 @@ class OrganizationController extends Controller
     public function show(Organization $organization)
     {
 
-            switch (request()->input('vacancies')) {
-                case "0":
-                    if (request()->boolean('workers')) {
-                        $vacancies = $organization->vacancies()->has('vacancyUsers')->get();
-                        foreach ($vacancies as $vacancy) {
-                            $users = $vacancy->vacancyUsers()->get();
-                            return $this->success($organization->toArray() + (['users' => $users]));
-                        }
-                    } else {
-                        return $this->success(OrganizationResource::make($organization));
-                    }
-                    break;
-                case "1":
-                    if (request()->boolean('workers')) {
-                        $vacancies_active = $organization->vacancies()->has('vacancyUsers', '<', DB::raw('workers_amount'))->get();
-                        $vacancies = $organization->vacancies()->has('vacancyUsers')->get();
-                        foreach ($vacancies as $vacancy) {
-                            $users = $vacancy->vacancyUsers()->get();
-                            return $this->success($organization->toArray() + (['vacancies_active' => $vacancies_active->toArray()]) + (['users' => $users]));
-                        }
-                    } else {
-                        return $this->success(OrganizationResource::make($organization->load((['vacancies' => function ($query) {
-                            $query->has('vacancyUsers', '<', DB::raw('workers_amount'));
-                        }]))));
-                    }
-                    break;
-                case "2":
-                    if (request()->boolean('workers')) {
-                        $vacancies_inactive = $organization->vacancies()->has('vacancyUsers', '>=', DB::raw('workers_amount'))->get();
-                        $vacancies = $organization->vacancies()->has('vacancyUsers')->get();
-                        foreach ($vacancies as $vacancy) {
-                            $users = $vacancy->vacancyUsers()->get();
-                            return $this->success($organization->toArray() + (['vacancies_active' => $vacancies_inactive->toArray()]) + (['users' => $users]));
-                        }
-                        }
-                    else {
-                        return $this->success(OrganizationResource::make($organization->load((['vacancies' => function ($query) {
-                            $query->has('vacancyUsers', '>=', DB::raw('workers_amount'));
-                        }]))));
-                    }
-                    break;
-                case "3":
-                    if (request()->boolean('workers')) {
-                        $vacancies_all = $organization->vacancies()->get();
-                        $vacancies = $organization->vacancies()->has('vacancyUsers')->get();
-                        foreach ($vacancies as $vacancy) {
-                            $users = $vacancy->vacancyUsers()->get();
-                            return $this->success($organization->toArray() + (['vacancies_all' => $vacancies_all->toArray()]) + (['users' => $users]));
-                        }
-                        }
-                    else {
-                    return $this->success(OrganizationResource::make($organization->load(['vacancies'])));
-                    break;
-                }
+        switch (request()->input('vacancies')) {
+            case "0":
+                $response1 = $organization->toArray();
+                //return $this->success($organization->toArray());
+                break;
+            case "1":
+                $vacancies_active = $organization->vacancies()->has('vacancyUsers', '<', DB::raw('workers_amount'))->get();
+                $response1 = $organization->toArray() + (['vacancies_active' => $vacancies_active->toArray()]);
+               // return $this->success($organization->toArray() + (['vacancies_active' => $vacancies_active->toArray()]));
+                break;
+            case "2":
+                $vacancies_inactive = $organization->vacancies()->has('vacancyUsers', '>=', DB::raw('workers_amount'))->get();
+                $response1 = $organization->toArray() + (['vacancies_active' => $vacancies_inactive->toArray()]);
+               // return $this->success($organization->toArray() + (['vacancies_active' => $vacancies_inactive->toArray()]));
+                break;
+            case "3":
+                $vacancies_all = $organization->vacancies()->get();
+                $response1 = $organization->toArray() + (['vacancies_all' => $vacancies_all->toArray()]);
+              //  return $this->success($response1);
+                //return $this->success($organization->toArray() + (['vacancies_all' => $vacancies_all->toArray()]));
+                break;
+        };
+         switch (request()->boolean('workers')) {
+        // case "0":
+        // return $this->success(['users' => 0]);
+        case "1":
+            $vacancies = $organization->vacancies()->has('vacancyUsers')->get();
+            $arrayUsers = array();
+            foreach ($vacancies as $vacancy) {
+                $users = $vacancy->vacancyUsers()->get()->toArray();
+                $arrayUsers = array_merge($arrayUsers, $users);
             }
+            //dd($arrayUsers);
+            $response2 = (['users' => $arrayUsers]);
+           // return $this->success($response2);
+            //return $this->success(['users' => $arrayUsers]);
+    }
+    //dd($response1+$response2);
+      return $this->success($response1+$response2);
     }
     /**
      * Update the specified resource in storage.

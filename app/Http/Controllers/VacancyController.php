@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\VacanciesUsersRequest;
 use App\Models\User;
 use App\Models\Vacancy;
 use Exception;
@@ -28,17 +29,13 @@ class VacancyController extends Controller
         /** @var User $user */
         $user = auth()->user();
 
-        if ($user->role === User::ROLE_WORKER or $user->role === User::ROLE_EMPLOYER ) {
+        if ($user->role === User::ROLE_WORKER or $user->role === User::ROLE_EMPLOYER or $user->role === User::ROLE_ADMIN and request()->query('only_active')==="true") {
         $vacancies_active = Vacancy::has('vacancyUsers', '<', DB::raw('workers_amount'))->paginate();
         return $this->success(VacancyResourceCollection::make($vacancies_active));}
-        else if ($user->role === User::ROLE_ADMIN and request()->query('only_active')==="true"){
-            $vacancies_active = Vacancy::has('vacancyUsers', '<', DB::raw('workers_amount'))->paginate();
-            return $this->success(VacancyResourceCollection::make($vacancies_active));
-        }
         else if ($user->role === User::ROLE_ADMIN and request()->query('only_active')==="false") {
-            $vacancies = Vacancy::all();
-           // return $this->success(VacancyResourceCollection::make($vacancies));
-            return VacancyResource::collection($vacancies);
+            $vacancies = Vacancy::paginate();;
+            return $this->success(VacancyResourceCollection::make($vacancies));
+            //return VacancyResource::collection($vacancies);
         }
     }
 
@@ -105,7 +102,7 @@ class VacancyController extends Controller
         return $this->success('Record deleted.', JsonResponse::HTTP_NO_CONTENT);
     }
 
-    public function vacancy_book(Request $request)
+    public function vacancy_book(VacanciesUsersRequest $request)
     {
         /** @var Vacancy $vacancy */
         $vacancy = Vacancy::find($request->vacancy_id);
@@ -124,7 +121,7 @@ class VacancyController extends Controller
         }
     }
 
-    public function vacancy_unbook(Request $request)
+    public function vacancy_unbook(VacanciesUsersRequest $request)
     {
         /** @var Vacancy $vacancy */
 
